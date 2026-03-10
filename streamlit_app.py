@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import pickle
 import matplotlib.pyplot as plt
-import seaborn as sns
 
 # page config
 st.set_page_config(
@@ -11,7 +10,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# custom css
+# CSS
 st.markdown("""
 <style>
 .big-font {
@@ -40,7 +39,7 @@ st.divider()
 # layout
 col1, col2 = st.columns(2)
 
-# INPUT PANEL
+# INPUT
 with col1:
 
     st.subheader("📊 Student Scores")
@@ -84,21 +83,7 @@ st.divider()
 
 # DATASET PREVIEW
 st.subheader("📂 Dataset Preview")
-
 st.dataframe(df.head())
-
-st.divider()
-
-# HEATMAP
-st.subheader("🔥 Correlation Heatmap")
-
-corr = df.corr(numeric_only=True)
-
-fig2, ax2 = plt.subplots()
-
-sns.heatmap(corr, annot=True, cmap="coolwarm", ax=ax2)
-
-st.pyplot(fig2)
 
 st.divider()
 
