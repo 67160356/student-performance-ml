@@ -1,6 +1,7 @@
-from sklearn.ensemble import RandomForestClassifier
-from preprocessing import X_train, y_train
+df["total_score"] = (
+    df["math_score"] +
+    df["reading_score"] +
+    df["writing_score"]
+)
 
-model = RandomForestClassifier()
-
-model.fit(X_train, y_train)
+df["pass"] = df["total_score"].apply(lambda x: 1 if x >= 150 else 0)
