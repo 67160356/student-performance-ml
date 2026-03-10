@@ -1,76 +1,114 @@
 import streamlit as st
-import pickle
 import pandas as pd
+import pickle
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 # page config
 st.set_page_config(
     page_title="Student Performance AI",
     page_icon="🎓",
-    layout="centered"
+    layout="wide"
 )
 
-# CSS styling
+# custom css
 st.markdown("""
 <style>
-.big-title {
-    text-align:center;
-    font-size:40px;
+.big-font {
+    font-size:40px !important;
     font-weight:bold;
 }
-
-.subtitle {
+.result-box {
+    padding:20px;
+    border-radius:10px;
     text-align:center;
-    color:gray;
-    margin-bottom:30px;
-}
-
-.result-pass {
-    background-color:#d4edda;
-    padding:20px;
-    border-radius:10px;
-    font-size:20px;
-}
-
-.result-fail {
-    background-color:#f8d7da;
-    padding:20px;
-    border-radius:10px;
-    font-size:20px;
+    font-size:25px;
 }
 </style>
 """, unsafe_allow_html=True)
 
-# load model
+# load model + dataset
 model = pickle.load(open("model.pkl","rb"))
+df = pd.read_csv("Student_performance_10k.csv")
 
-# title
-st.markdown('<p class="big-title">🎓 Student Performance AI</p>', unsafe_allow_html=True)
-st.markdown('<p class="subtitle">Predict if a student will pass based on exam scores</p>', unsafe_allow_html=True)
+# header
+st.markdown("<p class='big-font'>🎓 Student Performance AI Dashboard</p>", unsafe_allow_html=True)
+st.write("Predict student success using Machine Learning")
 
-# sliders
-math = st.slider("📊 Math Score",0,100,50)
-reading = st.slider("📚 Reading Score",0,100,50)
-writing = st.slider("✏️ Writing Score",0,100,50)
+st.divider()
 
-st.write("")
+# layout
+col1, col2 = st.columns(2)
 
-# input dataframe
-input_data = pd.DataFrame({
-    "math_score":[math],
-    "reading_score":[reading],
-    "writing_score":[writing]
-})
+# INPUT PANEL
+with col1:
 
-# predict button
-if st.button("🔮 Predict Result"):
+    st.subheader("📊 Student Scores")
 
-    prediction = model.predict(input_data)
+    math = st.slider("Math Score",0,100,50)
+    reading = st.slider("Reading Score",0,100,50)
+    writing = st.slider("Writing Score",0,100,50)
 
-    if prediction[0] == 1:
-        st.markdown('<div class="result-pass">✅ Student will PASS</div>', unsafe_allow_html=True)
-    else:
-        st.markdown('<div class="result-fail">❌ Student may FAIL</div>', unsafe_allow_html=True)
+    input_data = pd.DataFrame({
+        "math_score":[math],
+        "reading_score":[reading],
+        "writing_score":[writing]
+    })
 
-# footer
-st.write("")
-st.caption("Machine Learning Model • Streamlit Web App")
+    if st.button("🔮 Predict Result"):
+
+        prediction = model.predict(input_data)
+
+        if prediction[0] == 1:
+            st.markdown("<div class='result-box' style='background:#d4edda'>✅ PASS</div>", unsafe_allow_html=True)
+        else:
+            st.markdown("<div class='result-box' style='background:#f8d7da'>❌ FAIL</div>", unsafe_allow_html=True)
+
+# SCORE GRAPH
+with col2:
+
+    st.subheader("📈 Score Visualization")
+
+    scores = [math, reading, writing]
+    subjects = ["Math","Reading","Writing"]
+
+    fig, ax = plt.subplots()
+
+    ax.bar(subjects, scores)
+    ax.set_ylim(0,100)
+    ax.set_ylabel("Score")
+
+    st.pyplot(fig)
+
+st.divider()
+
+# DATASET PREVIEW
+st.subheader("📂 Dataset Preview")
+
+st.dataframe(df.head())
+
+st.divider()
+
+# HEATMAP
+st.subheader("🔥 Correlation Heatmap")
+
+corr = df.corr(numeric_only=True)
+
+fig2, ax2 = plt.subplots()
+
+sns.heatmap(corr, annot=True, cmap="coolwarm", ax=ax2)
+
+st.pyplot(fig2)
+
+st.divider()
+
+# MODEL INFO
+st.subheader("🤖 Model Info")
+
+st.write("Model used: **Machine Learning Classifier**")
+st.write("Features used:")
+st.write("- Math Score")
+st.write("- Reading Score")
+st.write("- Writing Score")
+
+st.caption("Built with Python • Scikit-learn • Streamlit")
